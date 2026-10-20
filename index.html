@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#667eea">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>FB Auto Creator — Web Panel</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: #333;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  padding: 12px;
+  padding-bottom: 80px;
+}
+
+.app { max-width: 680px; margin: 0 auto; }
+
+/* ===== HEADER ===== */
+.header {
+  text-align: center;
+  color: #fff;
+  margin-bottom: 16px;
+  padding: 12px 0;
+}
+.header h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+}
+.subtitle {
+  opacity: 0.9;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* ===== CARDS ===== */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+.card h2 {
+  font-size: 1rem;
+  margin-bottom: 16px;
+  color: #333;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hidden { display: none !important; }
+
+/* ===== FIELDS ===== */
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #555;
+  font-size: 0.85rem;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #e8e8e8;
+  background: #fafafa;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-family: 'Consolas', 'Monaco', monospace;
+  color: #222;
+  transition: border-color 0.15s, background 0.15s;
+  -webkit-appearance: none;
+}
+input[type="text"]:focus {
+  outline: none;
+  border-color: #667eea;
+  background: #fff;
+}
+input[type="text"]::placeholder { color: #aaa; }
+
+.row { display: flex; gap: 8px; align-items: stretch; }
+.row input { flex: 1; }
+
+/* ===== VERSION BUTTONS ===== */
+.btn-group {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.vbtn {
+  padding: 12px 4px;
+  border: 2px solid #e8e8e8;
+  background: #fafafa;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #555;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.vbtn:hover { border-color: #667eea; color: #667eea; }
+.vbtn.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border-color: transparent;
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: transform 0.1s, opacity 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-primary:hover { opacity: 0.95; }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-secondary {
+  padding: 12px 16px;
+  border: 2px solid #667eea;
+  background: #fff;
+  color: #667eea;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-secondary:hover { background: #667eea; color: #fff; }
+.btn-secondary:active { transform: scale(0.97); }
+
+/* ===== PROXY GRID ===== */
+.proxy-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.proxy-grid .full { grid-column: span 2; }
+.proxy-actions { display: flex; gap: 8px; margin-top: 8px; }
+.proxy-actions button { flex: 1; }
+
+.proxy-current {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: #f0f2ff;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: #555;
+  word-break: break-all;
+  border-left: 3px solid #667eea;
+}
+.proxy-current code {
+  color: #667eea;
+  font-weight: 700;
+  font-family: 'Consolas', monospace;
+}
+
+/* ===== RESULT ===== */
+#resultBox {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 14px;
+  font-family: 'Consolas', monospace;
+  font-size: 0.85rem;
+  line-height: 1.8;
+  word-break: break-all;
+}
+
+.info-row {
+  padding: 8px 0;
+  border-bottom: 1px dashed #e5e5e5;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+.info-row:last-child { border-bottom: none; }
+.info-row b { color: #555; flex-shrink: 0; }
+.info-row span { color: #222; text-align: right; word-break: break-all; }
+
+/* ===== COOKIE BOX ===== */
+.cookie-box {
+  background: #1a1a1a;
+  color: #00ff88;
+  padding: 14px;
+  border-radius: 10px;
+  margin-top: 12px;
+  font-size: 0.78rem;
+  overflow-x: auto;
+  position: relative;
+  padding-top: 42px;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+  font-family: 'Consolas', monospace;
+  line-height: 1.5;
+  word-break: break-all;
+}
+.cookie-box .copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #00ff88;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.cookie-box .copy-btn:active { opacity: 0.7; }
+
+/* ===== INFO / ERROR / WARN BOXES ===== */
+.error-box, .warn-box, .info-box {
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin: 10px 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+.error-box {
+  background: #ffebee;
+  border-left: 4px solid #f44336;
+  color: #c62828;
+}
+.error-box b { color: #b71c1c; }
+.warn-box {
+  background: #fff3e0;
+  border-left: 4px solid #ff9800;
+  color: #e65100;
+}
+.info-box {
+  background: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  color: #0d47a1;
+  font-size: 0.82rem;
+}
+
+/* ===== LOG ===== */
+.log {
+  max-height: 280px;
+  overflow-y: auto;
+  background: #1a1a1a;
+  color: #ddd;
+  padding: 12px;
+  border-radius: 10px;
+  font-family: 'Consolas', monospace;
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+.log-line { margin-bottom: 3px; }
+.log-line.ok { color: #00ff88; }
+.log-line.err { color: #ff5566; }
+.log-line.warn { color: #ffbb00; }
+
+/* ===== MODAL ===== */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 999;
+  padding: 0;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  padding: 20px;
+  width: 100%;
+  max-width: 680px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.modal-content h3 {
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.range-list { margin-bottom: 16px; }
+.range-item {
+  display: block;
+  width: 100%;
+  padding: 14px 12px;
+  margin-bottom: 8px;
+  border: 2px solid #e8e8e8;
+  background: #fafafa;
+  border-radius: 10px;
+  text-align: left;
+  cursor: pointer;
+  font-family: 'Consolas', monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #444;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.range-item:active { transform: scale(0.98); }
+.range-item:hover { border-color: #667eea; background: #f0f2ff; color: #667eea; }
+
+/* ===== SPINNER ===== */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== TOAST ===== */
+.copy-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: #323232;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 25px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: transform 0.25s ease;
+  z-index: 9999;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.copy-toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ===== WAKE LOCK BADGE ===== */
+.wakelock-badge {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: #4caf50;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  z-index: 9999;
+  display: none;
+}
+.wakelock-badge.active { display: block; }
+.wakelock-badge.warn { background: #ff9800; }
+
+/* ===== SCROLLBAR ===== */
+.log::-webkit-scrollbar { width: 6px; }
+.log::-webkit-scrollbar-track { background: #2a2a2a; }
+.log::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+
+/* ===== MOBILE ===== */
+@media (max-width: 480px) {
+  body { padding: 10px; padding-bottom: 70px; }
+  .header h1 { font-size: 1.3rem; }
+  .card { padding: 16px; border-radius: 14px; }
+  .card h2 { font-size: 0.95rem; }
+  .row { flex-direction: column; }
+  .proxy-grid { grid-template-columns: 1fr; }
+  .proxy-grid .full { grid-column: span 1; }
+  .proxy-actions { flex-direction: column; }
+  .info-row { flex-direction: column; gap: 4px; }
+  .info-row span { text-align: left; }
+  .log { max-height: 240px; font-size: 0.72rem; }
+  .modal-content { border-radius: 16px 16px 0 0; padding: 18px; }
+}
+
+/* ===== SMALL ===== */
+@media (max-width: 360px) {
+  .btn-group { grid-template-columns: repeat(2, 1fr); }
+  .header h1 { font-size: 1.15rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="wakelock-badge" id="wakeBadge">🔓 Screen Lock: ACTIVE</div>
+
+<div class="app">
+  <header class="header">
+    <h1>🤖 FB Auto Creator</h1>
+    <p class="subtitle">Version 1 · 2 · 3 · 4 — Web Edition</p>
+  </header>
+
+  <section class="card">
+    <h2>⚙️ Configuration</h2>
+
+    <div class="info-box">
+      <b>💡 Background Mode:</b> Keep tab open (even minimized). Screen stays on via Wake Lock.
+    </div>
+
+    <div class="field">
+      <label>Version</label>
+      <div class="btn-group" id="versionGroup">
+        <button class="vbtn" data-version="v1">V1</button>
+        <button class="vbtn" data-version="v2">V2</button>
+        <button class="vbtn" data-version="v3">V3</button>
+        <button class="vbtn" data-version="v4">V4</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Range</label>
+      <div class="row">
+        <input type="text" id="rangeInput" placeholder="Tap Fetch → select range" readonly>
+        <button id="fetchRangesBtn" class="btn-secondary">📞 Fetch</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <input type="text" id="passwordInput" placeholder="Enter password" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label>🌐 Proxy Settings</label>
+      <div class="proxy-grid">
+        <input type="text" id="proxyHost" placeholder="Server / Host">
+        <input type="text" id="proxyPort" placeholder="Port">
+        <input type="text" id="proxyUser" class="full" placeholder="Username (optional)">
+        <input type="text" id="proxyPass" class="full" placeholder="Password (optional)">
+      </div>
+      <div class="proxy-actions">
+        <button id="testProxyBtn" class="btn-secondary">🧪 Test Proxy</button>
+        <button id="clearProxyBtn" class="btn-secondary">🗑 Clear</button>
+      </div>
+      <div class="proxy-current">
+        Current: <code id="proxyPreview">not set</code>
+      </div>
+    </div>
+
+    <button id="createBtn" class="btn-primary">▶️ Create Account</button>
+  </section>
+
+  <section class="card hidden" id="resultCard">
+    <h2>📊 Result</h2>
+    <div id="resultBox"></div>
+  </section>
+
+  <section class="card hidden" id="logCard">
+    <h2>📜 Live Log</h2>
+    <div id="logBox" class="log"></div>
+  </section>
+</div>
+
+<div id="rangeModal" class="modal hidden">
+  <div class="modal-content">
+    <h3>
+      📞 Select Range
+      <button id="closeModal" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#888;">×</button>
+    </h3>
+    <div id="rangeList" class="range-list"></div>
+  </div>
+</div>
+
+<div id="copyToast" class="copy-toast">✅ Copied!</div>
+
+<script>
+const API_BASE = "https://smart-earning-z.ai.studio";
+
+const state = {
+  version:  "v1",
+  range:    "",
+  password: "",
+  proxy:    { host: "", port: "", user: "", pass: "" },
+  creating: false,
+  monitorTimer: null,
+  lastNumber: null,
+  lastPassword: null,
+  lastOtp: null,
+  wakeLock: null,
+};
+
+const $ = (sel) => document.querySelector(sel);
+
+const log = (msg, type = "") => {
+  const box = $("#logBox");
+  $("#logCard").classList.remove("hidden");
+  const line = document.createElement("div");
+  line.className = `log-line ${type}`;
+  const t = new Date().toLocaleTimeString();
+  line.textContent = `[${t}] ${msg}`;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+};
+
+// ============================================================
+// LOCALSTORAGE
+// ============================================================
+const SAVE_KEY = "fb_auto_creator_v7";
+
+function saveCfg() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      version: state.version,
+      range: state.range,
+      password: state.password,
+      proxy: state.proxy,
+    }));
+  } catch (e) {
+    console.warn("localStorage save failed:", e);
+  }
+}
+
+function loadCfg() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return;
+    const cfg = JSON.parse(raw);
+    state.version  = cfg.version  || "v1";
+    state.range    = cfg.range    || "";
+    state.password = cfg.password || "";
+    state.proxy    = cfg.proxy    || { host: "", port: "", user: "", pass: "" };
+  } catch (e) {
+    console.warn("localStorage load failed:", e);
+  }
+}
+
+// ============================================================
+// WAKE LOCK
+// ============================================================
+async function requestWakeLock() {
+  try {
+    if ("wakeLock" in navigator) {
+      state.wakeLock = await navigator.wakeLock.request("screen");
+      const badge = $("#wakeBadge");
+      badge.textContent = "🔓 Screen Lock: ACTIVE";
+      badge.classList.add("active");
+      badge.classList.remove("warn");
+
+      state.wakeLock.addEventListener("release", () => {
+        badge.textContent = "⚠️ Wake Lock: Released";
+        badge.classList.add("warn");
+      });
+      log("Wake Lock acquired — screen will stay on", "ok");
+    } else {
+      log("Wake Lock API not supported on this browser", "warn");
+    }
+  } catch (e) {
+    log(`Wake Lock error: ${e.message}`, "warn");
+  }
+}
+
+function releaseWakeLock() {
+  try {
+    if (state.wakeLock) {
+      state.wakeLock.release();
+      state.wakeLock = null;
+      $("#wakeBadge").classList.remove("active");
+    }
+  } catch {}
+}
+
+document.addEventListener("visibilitychange", async () => {
+  if (document.visibilityState === "visible" && state.creating) {
+    log("Page visible — re-acquiring wake lock", "ok");
+    await requestWakeLock();
+    pollOtpNow();
+  }
+});
+
+// ============================================================
+// FETCH WITH TIMEOUT
+// ============================================================
+async function apiFetch(url, opts = {}, timeoutMs = 180000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const r = await fetch(url, { ...opts, signal: controller.signal });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.json();
+  } catch (err) {
+    if (err.name === "AbortError") {
+      throw new Error(`Request timed out after ${Math.round(timeoutMs/1000)}s`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ============================================================
+// CLIPBOARD
+// ============================================================
+function showToast(msg) {
+  const t = $("#copyToast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+async function robustCopy(text) {
+  if (!text) { showToast("❌ Nothing to copy"); return false; }
+
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast("✅ Copied!");
+      return true;
+    } catch (e) {}
+  }
+
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    ta.setAttribute("readonly", "");
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    if (ok) { showToast("✅ Copied!"); return true; }
+  } catch (e) {}
+
+  try {
+    const range = document.createRange();
+    const ct = $("#cookieText");
+    if (ct) {
+      range.selectNodeContents(ct);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      showToast("⚠️ Selected — long-press to copy");
+      return true;
+    }
+  } catch (e) {}
+
+  showToast("⚠️ Select text manually");
+  return false;
+}
+
+// ============================================================
+// PROXY
+// ============================================================
+function buildProxyString() {
+  const { host, port, user, pass } = state.proxy;
+  if (!host || !port) return "";
+  if (user) return `${host}:${port}:${user}:${pass || ""}`;
+  return `${host}:${port}`;
+}
+
+function proxyPreviewText() {
+  const { host, port, user } = state.proxy;
+  if (!host || !port) return "not set";
+  return user ? `${host}:${port}:${user}:***` : `${host}:${port}`;
+}
+
+function renderVersion() {
+  document.querySelectorAll(".vbtn").forEach(b => {
+    b.classList.toggle("active", b.dataset.version === state.version);
+  });
+}
+
+function renderInputs() {
+  $("#rangeInput").value    = state.range;
+  $("#passwordInput").value = state.password;
+  $("#proxyHost").value = state.proxy.host || "";
+  $("#proxyPort").value = state.proxy.port || "";
+  $("#proxyUser").value = state.proxy.user || "";
+  $("#proxyPass").value = state.proxy.pass || "";
+  $("#proxyPreview").textContent = proxyPreviewText();
+}
+
+// ============================================================
+// API CALLS
+// ============================================================
+async function fetchRanges() {
+  log("Fetching live ranges from API...");
+  try {
+    const js = await apiFetch(`${API_BASE}/api/ranges`, {}, 30000);
+    if (!js.ok || !js.ranges?.length) {
+      log("No ranges returned from API", "err");
+      return;
+    }
+    log(`Got ${js.ranges.length} ranges`, "ok");
+    showRangeModal(js.ranges);
+  } catch (e) {
+    log(`Fetch ranges error: ${e.message}`, "err");
+  }
+}
+
+async function testProxy() {
+  const proxyStr = buildProxyString();
+  if (!proxyStr) { log("Enter proxy host & port first!", "warn"); return; }
+  log(`Testing proxy: ${proxyPreviewText()}`);
+  try {
+    const js = await apiFetch(`${API_BASE}/api/test-proxy`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ proxy: proxyStr }),
+    }, 30000);
+    if (js.ok) {
+      log(`✅ Proxy OK — IP: ${js.ip}, ${js.country} / ${js.city}`, "ok");
+    } else {
+      log(`❌ Proxy failed: ${js.error || "unknown"}`, "err");
+    }
+  } catch (e) {
+    log(`Proxy test error: ${e.message}`, "err");
+  }
+}
+
+async function createAccount() {
+  if (state.creating) { log("Already creating...", "warn"); return; }
+  if (!state.version)  { log("Select a version first", "err"); return; }
+  if (!state.range)    { log("Select a range first", "err"); return; }
+  if (!state.password) { log("Enter a password first", "err"); return; }
+
+  const proxyStr = buildProxyString();
+  if (!proxyStr) { log("Please fill Proxy Host & Port", "err"); return; }
+
+  state.creating = true;
+  $("#createBtn").disabled = true;
+  $("#createBtn").innerHTML = '<span class="spinner"></span>Creating...';
+
+  await requestWakeLock();
+
+  log(`Calling /api/create/${state.version}...`);
+  log(`Proxy: ${proxyPreviewText()}`);
+
+  try {
+    const js = await apiFetch(`${API_BASE}/api/create/${state.version}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        version: state.version,
+        range: state.range,
+        password: state.password,
+        proxy: proxyStr,
+        wait: true,
+      }),
+    }, 240000);
+
+    if (!js.ok) {
+      log(`❌ Create failed: ${js.error || "unknown"}`, "err");
+      showCreateFailed(js.error || "Unknown error");
+      finishCreate();
+      return;
+    }
+
+    const acc = js.account || {};
+    state.lastNumber = acc.number;
+    state.lastPassword = acc.password || state.password;
+
+    const accStatus = (acc.status || js.status || "created").toLowerCase();
+
+    log(`✅ Account submitted — +${acc.number} (${js.version || state.version.toUpperCase()})`, "ok");
+    showResult(acc, js, accStatus);
+
+    if (accStatus === "failed") {
+      log(`⚠️ API returned status: FAILED`, "warn");
+      finishCreate();
+      return;
+    }
+
+    startOtpPoll(acc.number);
+
+  } catch (e) {
+    log(`Create error: ${e.message}`, "err");
+    showCreateFailed(e.message);
+    finishCreate();
+  }
+}
+
+// ============================================================
+// OTP POLL
+// ============================================================
+let _currentOtpNumber = null;
+let _lastOtpSeen = null;
+let _pollStartTime = null;
+
+function startOtpPoll(number) {
+  if (state.monitorTimer) clearInterval(state.monitorTimer);
+  _currentOtpNumber = number;
+  _lastOtpSeen = null;
+  _pollStartTime = Date.now();
+
+  log(`🔔 OTP monitor started for +${number} (poll every 4s)`);
+  log(`🔓 Wake Lock active — minimize but don't close`);
+
+  state.monitorTimer = setInterval(pollOtpNow, 4000);
+  pollOtpNow();
+}
+
+async function pollOtpNow() {
+  if (!_currentOtpNumber || !state.creating) return;
+
+  const elapsedMs = Date.now() - _pollStartTime;
+  if (elapsedMs > 20 * 60 * 1000) {
+    if (state.monitorTimer) {
+      clearInterval(state.monitorTimer);
+      state.monitorTimer = null;
+    }
+    log("⏰ OTP monitor timed out (20 min)", "warn");
+    finishCreate();
+    return;
+  }
+
+  try {
+    const js = await apiFetch(`${API_BASE}/api/otp/${_currentOtpNumber}`, {}, 20000);
+    if (!js.ok) return;
+
+    const otp = js.otp;
+    if (otp && otp !== _lastOtpSeen) {
+      _lastOtpSeen = otp;
+      state.lastOtp = otp;
+      log(`⚡ OTP received: ${otp} (auto-login running...)`, "ok");
+      if (document.visibilityState === "hidden" && "Notification" in window) {
+        try { new Notification("OTP Received", { body: `Code: ${otp}` }); } catch {}
+      }
+    }
+
+    const curStatus = (js.status || "").toLowerCase();
+    const autoSt = (js.auto_login_status || "").toLowerCase();
+
+    if (autoSt === "success") {
+      if (state.monitorTimer) {
+        clearInterval(state.monitorTimer);
+        state.monitorTimer = null;
+      }
+      log(`✅ AUTO-LOGIN SUCCESS — UID: ${js.uid}`, "ok");
+      showAutoLogin(js, _currentOtpNumber);
+      finishCreate();
+      return;
+    }
+
+    if (autoSt === "failed" || curStatus === "failed") {
+      if (state.monitorTimer) {
+        clearInterval(state.monitorTimer);
+        state.monitorTimer = null;
+      }
+      const reason = js.auto_login_reason || js.error || "unknown";
+      log(`❌ Auto-login failed: ${reason}`, "err");
+      showAutoLoginFailed(otp || _lastOtpSeen, reason, _currentOtpNumber);
+      finishCreate();
+      return;
+    }
+  } catch (e) { /* silent */ }
+}
+
+function finishCreate() {
+  state.creating = false;
+  $("#createBtn").disabled = false;
+  $("#createBtn").textContent = "▶️ Create Account";
+  releaseWakeLock();
+}
+
+// ============================================================
+// UI RENDER
+// ============================================================
+function showCreateFailed(reason) {
+  $("#resultCard").classList.remove("hidden");
+  $("#resultBox").innerHTML = `
+    <div class="error-box">
+      <b>❌ Creation Failed</b><br>
+      <div style="margin-top:6px;"><b>Reason:</b> ${reason}</div>
+      <div style="margin-top:6px;"><b>Tip:</b> Try residential proxy if TLS fails.</div>
+    </div>
+  `;
+}
+
+function showResult(acc, res, accStatus) {
+  $("#resultCard").classList.remove("hidden");
+  const box = $("#resultBox");
+  const cookie = acc.cookie || "";
+  window._currentCookie = cookie;
+
+  const isFailed = accStatus === "failed";
+  const statusLine = isFailed
+    ? `<div class="error-box" style="padding:10px;font-size:0.82rem;"><b>Status: FAILED</b></div>`
+    : "";
+
+  box.innerHTML = `
+    ${statusLine}
+    <div class="info-row"><b>Version</b><span>${acc.version || state.version.toUpperCase()}</span></div>
+    <div class="info-row"><b>Number</b><span>+${acc.number || ""}</span></div>
+    <div class="info-row"><b>Name</b><span>${acc.firstname || ""} ${acc.lastname || ""}</span></div>
+    <div class="info-row"><b>DOB</b><span>${acc.dob || ""}</span></div>
+    <div class="info-row"><b>Password</b><span>${acc.password || ""}</span></div>
+    <div class="info-row"><b>UID</b><span>${acc.uid || "Pending OTP"}</span></div>
+    <div class="info-row"><b>Status</b><span>${acc.status || "created"}</span></div>
+    ${cookie ? `
+      <div class="cookie-box">
+        <button class="copy-btn" id="copyCookieBtn">📋 Copy</button>
+        <div id="cookieText">${cookie}</div>
+      </div>
+    ` : ""}
+  `;
+
+  if (cookie) $("#copyCookieBtn").onclick = () => robustCopy(cookie);
+}
+
+function showAutoLogin(js, number) {
+  $("#resultCard").classList.remove("hidden");
+  const box = $("#resultBox");
+  const cookie = js.cookie || "";
+  window._currentCookie = cookie;
+
+  box.innerHTML = `
+    <div class="info-row"><b>🎉 Status</b><span>AUTO-LOGIN SUCCESS</span></div>
+    <div class="info-row"><b>Phone</b><span>+${number}</span></div>
+    <div class="info-row"><b>OTP</b><span>${js.otp || ""}</span></div>
+    <div class="info-row"><b>UID</b><span>${js.uid || ""}</span></div>
+    <div class="info-row"><b>Live</b><span>${js.live_status || "unknown"}</span></div>
+    ${cookie ? `
+      <div class="cookie-box">
+        <button class="copy-btn" id="copyCookieBtn">📋 Copy</button>
+        <div id="cookieText">${cookie}</div>
+      </div>
+    ` : ""}
+  `;
+
+  if (cookie) $("#copyCookieBtn").onclick = () => robustCopy(cookie);
+}
+
+function showAutoLoginFailed(otp, reason, number) {
+  $("#resultCard").classList.remove("hidden");
+  const box = $("#resultBox");
+
+  box.innerHTML = `
+    <div class="error-box">
+      <b>❌ Auto-Login Failed</b><br>
+      <div style="margin-top:6px;"><b>Reason:</b> ${reason}</div>
+    </div>
+
+    <div class="info-row"><b>Phone</b><span>+${number}</span></div>
+    <div class="info-row"><b>OTP</b><span>${otp || "N/A"}</span></div>
+    <div class="info-row"><b>Password</b><span>${state.lastPassword || "N/A"}</span></div>
+
+    <div class="info-box" style="margin-top:14px;">
+      <b>💡 Try:</b> Residential proxy + Manual OTP retry below
+    </div>
+
+    <button id="retryLoginBtn" class="btn-secondary" style="width:100%;margin-top:10px;">
+      🔄 Retry Manual OTP Login
+    </button>
+  `;
+
+  $("#retryLoginBtn").onclick = async () => {
+    if (!otp) { log("No OTP to retry with", "err"); return; }
+    log(`Retrying manual OTP for +${number}...`);
+    try {
+      const proxyStr = buildProxyString();
+      const js = await apiFetch(`${API_BASE}/api/manual-otp-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: number, otp: otp, proxy: proxyStr }),
+      }, 60000);
+      if (js.ok) {
+        log(`✅ Manual login SUCCESS — UID: ${js.uid}`, "ok");
+        showAutoLogin({ otp, uid: js.uid, cookie: js.cookie, live_status: js.live_status }, number);
+      } else {
+        log(`❌ Manual login failed: ${js.error || "unknown"}`, "err");
+        showToast("❌ Manual login failed");
+      }
+    } catch (e) {
+      log(`Manual login error: ${e.message}`, "err");
+    }
+  };
+}
+
+function showRangeModal(ranges) {
+  const modal = $("#rangeModal");
+  const list = $("#rangeList");
+  list.innerHTML = "";
+  ranges.slice(0, 40).forEach(r => {
+    const btn = document.createElement("button");
+    btn.className = "range-item";
+    btn.textContent = `${r.range}  (${r.sid || "FB"})`;
+    btn.onclick = () => {
+      state.range = r.range;
+      renderInputs();
+      saveCfg();
+      log(`Range selected: ${r.range}`, "ok");
+      modal.classList.add("hidden");
+    };
+    list.appendChild(btn);
+  });
+  modal.classList.remove("hidden");
+}
+
+// ============================================================
+// BIND EVENTS
+// ============================================================
+function bindEvents() {
+  document.querySelectorAll(".vbtn").forEach(b => {
+    b.onclick = () => {
+      state.version = b.dataset.version;
+      renderVersion();
+      saveCfg();
+      log(`Version: ${state.version.toUpperCase()}`);
+    };
+  });
+
+  $("#rangeInput").oninput    = (e) => { state.range    = e.target.value.trim(); saveCfg(); };
+  $("#passwordInput").oninput = (e) => { state.password = e.target.value;       saveCfg(); };
+
+  $("#proxyHost").oninput = (e) => { state.proxy.host = e.target.value.trim(); $("#proxyPreview").textContent = proxyPreviewText(); saveCfg(); };
+  $("#proxyPort").oninput = (e) => { state.proxy.port = e.target.value.trim(); $("#proxyPreview").textContent = proxyPreviewText(); saveCfg(); };
+  $("#proxyUser").oninput = (e) => { state.proxy.user = e.target.value.trim(); $("#proxyPreview").textContent = proxyPreviewText(); saveCfg(); };
+  $("#proxyPass").oninput = (e) => { state.proxy.pass = e.target.value; saveCfg(); };
+
+  $("#clearProxyBtn").onclick = () => {
+    if (!confirm("Clear proxy settings?")) return;
+    state.proxy = { host: "", port: "", user: "", pass: "" };
+    renderInputs(); saveCfg();
+    log("Proxy cleared", "warn");
+  };
+
+  $("#fetchRangesBtn").onclick = fetchRanges;
+  $("#testProxyBtn").onclick   = testProxy;
+  $("#createBtn").onclick      = createAccount;
+  $("#closeModal").onclick     = () => $("#rangeModal").classList.add("hidden");
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener("DOMContentLoaded", () => {
+  loadCfg();
+  renderVersion();
+  renderInputs();
+  bindEvents();
+
+  const hasSavedProxy = state.proxy.host && state.proxy.port;
+  const hasSavedPw = !!state.password;
+  const hasSavedRange = !!state.range;
+
+  log("App ready — API: " + API_BASE);
+  if (hasSavedProxy) log(`✅ Proxy loaded: ${proxyPreviewText()}`, "ok");
+  if (hasSavedPw) log(`✅ Password loaded`, "ok");
+  if (hasSavedRange) log(`✅ Range loaded: ${state.range}`, "ok");
+  if (hasSavedProxy && hasSavedPw && hasSavedRange) {
+    log(`🎯 All settings ready — tap Create to start`, "ok");
+  }
+
+  if ("Notification" in window && Notification.permission === "default") {
+    Notification.requestPermission().catch(() => {});
+  }
+});
+</script>
+</body>
+</html>
